@@ -22,6 +22,7 @@
         --header-h: 78px;
         --header-h-mobile: 110px;
         --loader-time: 4500ms;
+        --app-h-padding: 18px; /* unified horizontal padding */
       }
       * {
         box-sizing: border-box;
@@ -47,13 +48,15 @@
         left: 0;
         right: 0;
         height: var(--header-h);
+        /* include safe-area inset for notch/status bars and add more bottom padding */
+        padding: calc(env(safe-area-inset-top, 12px) + 8px) var(--app-h-padding) 14px var(--app-h-padding);
         background: linear-gradient(90deg, #0e3f38, #0a4c45);
         display: flex;
         align-items: center;
         z-index: 120;
-        padding: 10px 18px;
         box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
       }
+      /* header-inner now has the same horizontal padding as the main content and centers content */
       .header-inner {
         max-width: 1300px;
         margin: 0 auto;
@@ -61,6 +64,7 @@
         align-items: center;
         gap: 12px;
         width: 100%;
+        padding: 0; /* horizontal padding is on header itself via --app-h-padding */
       }
       .brand {
         display: flex;
@@ -125,6 +129,7 @@
         transform: rotate(180deg);
       }
 
+      /* search-wrap gets room inside header due to added header bottom padding */
       .search-wrap {
         flex: 0 1 560px;
         max-width: 560px;
@@ -155,7 +160,7 @@
         background: transparent;
         border: 0;
         color: rgba(255, 255, 255, 0.6);
-        cursor: pointer;
+        cursor: button;
         padding: 6px 8px;
         border-radius: 8px;
       }
@@ -163,7 +168,7 @@
       @media (max-width: 720px) {
         header.app-header {
           height: var(--header-h-mobile);
-          padding: 12px;
+          padding: calc(env(safe-area-inset-top, 12px) + 8px) var(--app-h-padding) 12px var(--app-h-padding);
         }
         .header-inner {
           flex-direction: column;
@@ -180,10 +185,11 @@
         }
       }
 
+      /* main.wrap uses the same horizontal padding so header & content gutters match */
       main.wrap {
         max-width: 1300px;
         margin: calc(var(--header-h) + 22px) auto 60px;
-        padding: 0 18px;
+        padding: 0 var(--app-h-padding);
         transition: margin-top 0.2s;
       }
       @media (max-width: 720px) {
@@ -221,6 +227,7 @@
         opacity: 0;
         transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1),
           opacity 0.45s;
+        position: relative;
       }
       .card.show {
         transform: none;
@@ -923,11 +930,11 @@
         const inv = document.createElement("div");
         inv.style.position = "absolute";
         inv.style.top = "16px";
-        inv.style.right = "22px";
+        /* align invoice with card padding (18px) so right gutter is symmetric */
+        inv.style.right = "18px";
         inv.style.fontWeight = "800";
         inv.style.opacity = "0.95";
         inv.textContent = card.invoice;
-        el.style.position = "relative";
         el.appendChild(inv);
 
         return el;
