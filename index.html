@@ -3,21 +3,22 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>QR Code Tracker</title>
-    <!-- SweetAlert2 (toasts) -->
+    <title>QR Code Tracker — Card View</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
+    />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
       :root {
-        --bg1: #061314;
-        --bg2: #0b1717;
-        --muted: #9aa7b2;
-        --accent: #24c1a0;
-        --accent2: #22a6ff;
-        --card-radius: 14px;
-        --thumb-size: 120px;
+        --bg: #071617;
+        --panel: #0b1616;
+        --muted: #92a3ad;
+        --accent: #18a08d;
+        --card-radius: 12px;
+        --thumb-size: 108px;
         --gap: 20px;
-        --header-h: 72px;
-        --loader-z: 1600;
+        --header-h: 76px;
       }
       * {
         box-sizing: border-box;
@@ -28,175 +29,160 @@
       }
       body {
         margin: 0;
-        font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
-        -webkit-font-smoothing: antialiased;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        background: linear-gradient(180deg, #061213 0%, #071617 120%);
         color: #eaf6ff;
-        background: linear-gradient(180deg, var(--bg1), var(--bg2));
-        scroll-behavior: smooth;
-        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-y: auto;
       }
 
-      /* ensure SweetAlert toasts appear above header */
-      .swal2-container {
-        z-index: 1700 !important;
-      }
-
-      /* header */
+      /* ===== fixed header ===== */
       header.app-header {
-        position: sticky;
+        position: fixed;
+        left: 0;
+        right: 0;
         top: 0;
-        z-index: 1200;
         height: var(--header-h);
         display: flex;
         align-items: center;
-        background: linear-gradient(90deg, #08363b, #0b2f2f);
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 18px;
+        background: linear-gradient(90deg, #0b3b36 0%, #0e4b45 60%);
+        z-index: 9998;
         border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        padding: 10px 18px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
       }
-      .header-inner {
-        max-width: 1200px;
-        margin: 0 auto;
-        width: 100%;
+      .header-left {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
       }
       .brand {
         display: flex;
         align-items: center;
         gap: 12px;
-        flex: 0 0 auto;
+        font-weight: 800;
+        font-size: 18px;
+        color: #eefcff;
       }
-      .logo {
-        width: 44px;
-        height: 44px;
+      .brand-logo {
+        width: 46px;
+        height: 46px;
         border-radius: 10px;
-        background: #e7fbf5;
-        color: #0a6b5c;
+        background: #e8fff9;
+        color: #0c6;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 800;
       }
-      .brand h1 {
-        margin: 0;
-        font-size: 18px;
-      }
-      .controls {
+      .header-actions {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-left: 8px;
+        gap: 12px;
       }
-      .sort-wrap {
-        display: flex;
-        align-items: center;
-        padding: 6px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.02);
-      }
+      /* sort control (icon only) */
       .sort-btn {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        border: none;
-        background: transparent;
-        color: #dff6ff;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .sort-btn.active {
         background: rgba(255, 255, 255, 0.03);
-      }
-
-      /* search */
-      .search-wrap {
-        margin-left: auto;
-        flex: 1 1 auto;
-        max-width: 760px;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        height: 44px;
+        padding: 0 10px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        color: var(--muted);
       }
-      .search {
-        position: relative;
-        width: 100%;
+      .sort-btn svg {
+        width: 18px;
+        height: 18px;
+        display: block;
       }
-      .search input {
-        width: 100%;
-        padding: 12px 44px 12px 44px;
-        border-radius: 28px;
+      /* search (desktop) */
+      .search-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        color: #dfeefc;
+        padding: 8px 12px;
+        border-radius: 14px;
+        width: 560px;
+        max-width: calc(100vw - 340px);
+        border: 1px solid rgba(255, 255, 255, 0.02);
+      }
+      .search-wrap input {
+        flex: 1;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        color: rgba(255, 255, 255, 0.9);
         font-size: 14px;
       }
-      .search .icon-left {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--muted);
+      .search-icon {
+        opacity: 0.85;
       }
-      .search .clear-btn {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: none;
+      .clear-btn {
         background: transparent;
+        border: 0;
         color: var(--muted);
         cursor: pointer;
-        padding: 6px;
-        border-radius: 8px;
       }
-      .search .clear-btn.hidden {
+
+      /* content wrapper offset for fixed header */
+      main {
+        padding-top: calc(var(--header-h) + 18px);
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-left: 18px;
+        padding-right: 18px;
+        transition: padding-top 0.2s;
+      }
+      .controls-mobile {
         display: none;
       }
 
-      /* main content spacing */
-      main.content {
-        max-width: 1200px;
-        margin: 12px auto 80px;
-        padding: calc(var(--header-h) + 12px) 18px 40px;
-      }
-
-      /* grid responsive: mobile 1 column, tablet 2, large 3 */
+      /* grid layout - 2 columns on wide screens as requested */
       .grid {
         display: grid;
         gap: var(--gap);
-        grid-template-columns: repeat(1, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+        align-items: start;
+        scroll-behavior: smooth;
+        padding-bottom: 120px;
       }
-      @media (min-width: 900px) {
+      @media (max-width: 1100px) {
         .grid {
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(2, minmax(260px, 1fr));
         }
       }
-      @media (min-width: 1300px) {
+      @media (max-width: 760px) {
         .grid {
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: 1fr;
         }
       }
 
       .card {
         background: linear-gradient(
           180deg,
-          rgba(255, 255, 255, 0.01),
+          rgba(255, 255, 255, 0.02),
           rgba(255, 255, 255, 0.01)
         );
         border-radius: var(--card-radius);
-        padding: 18px;
+        padding: 16px;
         border: 1px solid rgba(255, 255, 255, 0.03);
-        box-shadow: 0 10px 36px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        transition: transform 0.22s, box-shadow 0.22s;
+        gap: 14px;
+        min-height: 280px;
+        transition: transform 0.22s ease, box-shadow 0.22s;
       }
       .card:hover {
         transform: translateY(-6px);
-        box-shadow: 0 26px 72px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
       }
 
       .card-head {
@@ -204,80 +190,72 @@
         gap: 12px;
         align-items: flex-start;
       }
-      .title-block {
+      .meta {
         flex: 1;
       }
-      .title {
+      .invoice {
         font-weight: 800;
         font-size: 18px;
-        margin: 0 0 6px 0;
       }
-      .meta-row {
-        display: flex;
-        gap: 14px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .meta-item {
-        display: flex;
-        gap: 10px;
-        align-items: center;
+      .small-meta {
         color: var(--muted);
         font-size: 13px;
+        margin-top: 6px;
+        display: flex;
+        gap: 18px;
       }
-      .meta-strong {
-        font-weight: 800;
-        color: #eaf6ff;
-        font-size: 14px;
+      .small-meta .meta-item {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 13px;
+        color: var(--muted);
       }
 
       .card-body {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
       }
       .row {
         display: flex;
         gap: 12px;
-        align-items: center;
+        align-items: flex-start;
         flex-wrap: wrap;
       }
       .label {
         color: var(--muted);
-        width: 140px;
-        flex: 0 0 140px;
+        flex: 0 0 120px;
         font-size: 14px;
-      }
-      @media (max-width: 640px) {
-        .label {
-          width: 110px;
-          flex-basis: 110px;
-        }
       }
       .value {
         flex: 1;
-        font-weight: 700;
       }
+
       .chips {
         display: flex;
-        flex-wrap: wrap;
         gap: 10px;
+        flex-wrap: wrap;
       }
       .chip {
-        background: rgba(255, 255, 255, 0.02);
+        background: rgba(255, 255, 255, 0.03);
         padding: 8px 12px;
         border-radius: 999px;
         font-size: 13px;
-        color: #dfeefc;
+        color: #eaf6ff;
         border: 1px solid rgba(255, 255, 255, 0.02);
       }
 
-      /* thumbs grid - uses CSS fallback; JS adjusts columns too */
+      /* thumbs grid: 7 slots max, responsive auto-flow */
       .thumbs {
         display: grid;
         gap: 12px;
-        align-content: start;
-        grid-template-columns: repeat(auto-fit, minmax(var(--thumb-size), 1fr));
+        grid-template-columns: repeat(3, minmax(var(--thumb-size), 1fr));
+      }
+      @media (max-width: 760px) {
+        .thumbs {
+          grid-template-columns: repeat(3, minmax(72px, 1fr));
+        }
       }
       .thumb {
         border-radius: 12px;
@@ -287,12 +265,14 @@
           rgba(255, 255, 255, 0.01),
           rgba(255, 255, 255, 0.02)
         );
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         aspect-ratio: 1/1;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
-        cursor: pointer;
+        min-height: var(--thumb-size);
+        border: 1px solid rgba(255, 255, 255, 0.02);
         position: relative;
-        border: 2px solid rgba(255, 255, 255, 0.02);
+        cursor: pointer;
       }
       .thumb img {
         width: 100%;
@@ -306,400 +286,385 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 15px;
         color: var(--muted);
-        background: linear-gradient(
-          180deg,
-          rgba(0, 0, 0, 0.35),
-          rgba(0, 0, 0, 0.35)
-        );
-        border-radius: 8px;
-      }
-
-      /* pill */
-      .pill {
-        padding: 8px 18px;
-        border-radius: 999px;
-        font-weight: 800;
-        color: white;
-        display: inline-block;
-      }
-      .pill.done {
-        background: linear-gradient(180deg, #16a34a, #0ea25a);
-      }
-      .pill.pending {
-        background: linear-gradient(180deg, #ef4444, #ef6b6b);
+        font-size: 14px;
+        background: rgba(0, 0, 0, 0.2);
       }
 
       /* modal */
       .modal-backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.85);
+        background: rgba(0, 0, 0, 0.8);
         display: none;
         align-items: center;
         justify-content: center;
-        z-index: 1300;
-        padding: 18px;
+        z-index: 99999;
+        padding: 16px;
       }
       .modal {
-        background: linear-gradient(180deg, #071618, #0a1718);
+        background: #071718;
+        padding: 14px;
         border-radius: 12px;
-        padding: 16px;
-        max-width: 920px;
+        max-width: 900px;
         width: 100%;
-        max-height: 92vh;
+        max-height: 88vh;
         overflow: auto;
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.03);
       }
-      .modal-img {
+      .modal img {
         width: 100%;
         height: auto;
-        max-height: 72vh;
-        object-fit: contain;
-        border-radius: 8px;
-      }
-      .links-list {
-        margin-top: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        align-items: center;
-      }
-      .link-row {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-        background: rgba(255, 255, 255, 0.02);
-        padding: 10px 14px;
         border-radius: 10px;
-        width: 100%;
-      }
-      .link-row a {
-        color: var(--accent2);
-        text-decoration: underline;
-        word-break: break-all;
       }
 
-      /* NEW loader (full-screen) */
-      .loader-wrap {
+      /* Loader overlay (shown at page start) */
+      .loader-backdrop {
         position: fixed;
         inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: var(--loader-z);
-        pointer-events: auto;
+        z-index: 10000;
         background: linear-gradient(
           180deg,
-          rgba(2, 10, 10, 0.7),
-          rgba(2, 10, 10, 0.9)
+          rgba(2, 6, 7, 0.98),
+          rgba(2, 6, 7, 0.98)
         );
-      }
-      .loader-card {
-        pointer-events: auto;
-        padding: 22px;
-        border-radius: 12px;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.02),
-          rgba(255, 255, 255, 0.01)
-        );
-        display: flex;
+        flex-direction: column;
         gap: 18px;
+      }
+      .qr-loader {
+        width: 110px;
+        height: 110px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #0f3b35, #083d35);
+        display: flex;
         align-items: center;
-        box-shadow: 0 26px 80px rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
+        position: relative;
       }
-      .qr-anim {
-        width: 92px;
-        height: 92px;
-        border-radius: 10px;
-        background: #072a2a;
+      /* small animated squares inside mimic a qr anim */
+      .qr-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-        gap: 6px;
-        padding: 8px;
+        grid-template-columns: repeat(3, 18px);
+        grid-gap: 6px;
       }
-      .qr-anim .sq {
-        background: #0fa98e;
-        border-radius: 3px;
-        opacity: 0.14;
-        transform: scale(0.7);
-        animation: pop 0.95s infinite ease-in-out;
+      .qr-grid .cell {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        background: #143e36;
+        opacity: 0.12;
+        transform: scale(0.9);
+        animation: blink 1100ms infinite ease-in-out;
       }
-      .qr-anim .sq:nth-child(2) {
-        animation-delay: 0.08s;
+      .qr-grid .cell:nth-child(1) {
+        animation-delay: 0ms;
       }
-      .qr-anim .sq:nth-child(3) {
-        animation-delay: 0.16s;
+      .qr-grid .cell:nth-child(2) {
+        animation-delay: 80ms;
       }
-      .qr-anim .sq:nth-child(4) {
-        animation-delay: 0.24s;
+      .qr-grid .cell:nth-child(3) {
+        animation-delay: 160ms;
       }
-      .qr-anim .sq:nth-child(5) {
-        animation-delay: 0.32s;
+      .qr-grid .cell:nth-child(4) {
+        animation-delay: 240ms;
       }
-      .qr-anim .sq:nth-child(6) {
-        animation-delay: 0.4s;
+      .qr-grid .cell:nth-child(5) {
+        animation-delay: 320ms;
       }
-      .qr-anim .sq:nth-child(7) {
-        animation-delay: 0.48s;
+      .qr-grid .cell:nth-child(6) {
+        animation-delay: 400ms;
       }
-      .qr-anim .sq:nth-child(8) {
-        animation-delay: 0.56s;
+      .qr-grid .cell:nth-child(7) {
+        animation-delay: 480ms;
       }
-      .qr-anim .sq:nth-child(9) {
-        animation-delay: 0.64s;
+      .qr-grid .cell:nth-child(8) {
+        animation-delay: 560ms;
       }
-      @keyframes pop {
-        0% {
+      .qr-grid .cell:nth-child(9) {
+        animation-delay: 640ms;
+      }
+      @keyframes blink {
+        0%,
+        100% {
           opacity: 0.12;
-          transform: scale(0.7);
+          transform: scale(0.9);
         }
         50% {
           opacity: 1;
           transform: scale(1);
         }
-        100% {
-          opacity: 0.12;
-          transform: scale(0.7);
-        }
       }
+
       .loader-text {
-        font-weight: 800;
-        color: #e7fbf5;
-        font-size: 18px;
-      }
-      .loader-sub {
         color: var(--muted);
-        font-size: 13px;
+        font-size: 14px;
+      }
+      /* ensure swal toasts appear above header */
+      .swal2-container {
+        z-index: 11000 !important;
       }
 
-      /* small helpers */
-      .icon-like {
-        background: transparent;
-        border: none;
-        color: var(--muted);
-        cursor: pointer;
-        font-size: 16px;
+      /* small device tweaks: search below header & carrot to right */
+      @media (max-width: 720px) {
+        .search-wrap {
+          width: 100%;
+          max-width: none;
+          display: block;
+          padding: 10px 12px;
+          border-radius: 14px;
+        }
+        header.app-header {
+          flex-direction: row;
+          align-items: center;
+          gap: 10px;
+        }
+        .controls-mobile {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          width: 100%;
+        }
+        .header-actions {
+          order: 3;
+        }
+        .header-left {
+          flex: 1;
+        }
+        /* move search below header: we will show mobile search area */
+        .search-desktop {
+          display: none;
+        }
+        .search-mobile {
+          display: block;
+          margin-top: calc(var(--header-h) + 8px);
+          padding: 0 18px;
+        }
+        main {
+          padding-top: calc(var(--header-h) + 66px);
+        }
+        .sort-btn {
+          height: 44px;
+        }
       }
-      .muted {
-        color: var(--muted);
+      @media (min-width: 721px) {
+        .search-mobile {
+          display: none;
+        }
       }
 
-      @media (max-width: 600px) {
-        :root {
-          --thumb-size: 92px;
-        }
-        .header-inner {
-          padding-right: 8px;
-        }
-        .brand h1 {
-          font-size: 16px;
-        }
-        .search input {
-          font-size: 13px;
-        }
-        .loader-card {
-          padding: 12px;
-        }
-        .loader-text {
-          font-size: 15px;
-        }
+      /* tiny helpers */
+      .sr-only {
+        position: absolute;
+        left: -9999px;
       }
     </style>
   </head>
   <body>
-    <header class="app-header" aria-label="Top Bar">
-      <div class="header-inner">
-        <div class="brand" role="banner">
-          <div class="logo">QR</div>
-          <h1>QR Code Tracker</h1>
+    <!-- Loader overlay shown at start -->
+    <div id="loader" class="loader-backdrop" aria-hidden="false">
+      <div class="qr-loader" aria-hidden="true">
+        <div class="qr-grid" aria-hidden="true">
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
         </div>
+      </div>
+      <div class="loader-text">Tracking your QR — preparing dashboard…</div>
+    </div>
 
-        <div class="controls" role="region" aria-label="Sort control">
-          <div class="sort-wrap" title="Toggle sort (newest / oldest)">
-            <button id="sortToggle" class="sort-btn" aria-label="Toggle sort">
-              <svg
-                id="sortIcon"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <path
-                  d="M6 9l6-6 6 6M18 15l-6 6-6-6"
-                  stroke="#dff6ff"
-                  stroke-width="1.4"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
+    <header class="app-header" role="banner">
+      <div class="header-left">
+        <div class="brand" aria-label="QR Code Tracker">
+          <div class="brand-logo">QR</div>
+          <div>QR Code Tracker</div>
         </div>
-
-        <div class="search-wrap">
-          <div class="search" role="search">
-            <span class="icon-left" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M21 21l-4.35-4.35"
-                  stroke="#9aa7b2"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="6"
-                  stroke="#9aa7b2"
-                  stroke-width="1.6"
-                />
-              </svg>
-            </span>
-            <input
-              id="searchInput"
-              placeholder="Search invoice, location, date, month (jan / january) or batch..."
-              aria-label="Search"
+        <div style="width: 8px"></div>
+        <!-- sort button (icon only) -->
+        <button
+          id="sortBtn"
+          class="sort-btn"
+          title="Toggle sort (newest/oldest)"
+        >
+          <svg
+            id="sortIcon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M7 11l5-5 5 5M7 19l5-5 5 5"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             />
-            <button
-              id="clearBtn"
-              class="clear-btn hidden"
-              title="Clear search"
-              aria-label="Clear search"
-            >
-              ✕
-            </button>
-          </div>
+          </svg>
+        </button>
+      </div>
+
+      <div class="header-actions">
+        <div
+          class="search-wrap search-desktop"
+          title="Search (invoice, location, date or month)"
+        >
+          <svg
+            class="search-icon"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
+              stroke-width="1.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <input
+            id="searchInput"
+            placeholder="Search invoice, location, date, month (jan / january) or batch..."
+            aria-label="Search"
+          />
+          <button
+            id="clearSearch"
+            class="clear-btn"
+            title="Clear search"
+            aria-label="Clear search"
+            style="display: none"
+          >
+            ✕
+          </button>
         </div>
       </div>
     </header>
 
-    <main
-      class="content"
-      id="mainContent"
-      aria-live="polite"
-      style="
-        visibility: hidden;
-        opacity: 0;
-        transition: opacity 0.28s, visibility 0.28s;
-      "
-    >
-      <div id="grid" class="grid"></div>
+    <!-- mobile search below header -->
+    <div class="search-mobile" style="display: none">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 18px">
+        <div class="search-wrap">
+          <svg
+            class="search-icon"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
+              stroke-width="1.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <input
+            id="searchInputMobile"
+            placeholder="Search invoice, location, date, month (jan / january) or batch..."
+            aria-label="Search mobile"
+          />
+          <button
+            id="clearSearchMobile"
+            class="clear-btn"
+            title="Clear search"
+            style="display: none"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <section id="grid" class="grid" aria-live="polite"></section>
     </main>
 
-    <!-- modal -->
+    <!-- modal for image/links -->
     <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
       <div class="modal" role="dialog" aria-modal="true">
         <div
           style="
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             margin-bottom: 10px;
           "
         >
-          <div style="font-weight: 800; color: #eaf6ff" id="modalTitle">QR</div>
-          <div>
-            <button id="modalClose" class="icon-like" aria-label="Close modal">
-              Close
-            </button>
-          </div>
+          <div id="modalTitle" style="font-weight: 800"></div>
+          <button
+            id="modalClose"
+            style="
+              background: transparent;
+              border: 1px solid rgba(255, 255, 255, 0.06);
+              padding: 8px 10px;
+              border-radius: 8px;
+              color: #e6eef8;
+              cursor: pointer;
+            "
+          >
+            Close
+          </button>
         </div>
-        <img id="modalImage" class="modal-img" src="" alt="QR large" />
-        <div id="modalLinks" class="links-list"></div>
-      </div>
-    </div>
-
-    <!-- loader (full-screen) -->
-    <div id="loaderWrap" class="loader-wrap" aria-hidden="false">
-      <div class="loader-card" role="status" aria-live="polite">
-        <div class="qr-anim" aria-hidden="true">
-          <div class="sq"></div>
-          <div class="sq"></div>
-          <div class="sq"></div>
-          <div class="sq"></div>
-          <div class="sq"></div>
-          <div class="sq"></div>
-          <div class="sq"></div>
-          <div class="sq"></div>
-          <div class="sq"></div>
-        </div>
-        <div>
-          <div class="loader-text">Scanning QR</div>
-          <div class="loader-sub">Tracking your QR — preparing view…</div>
-        </div>
+        <img id="modalImage" src="" alt="QR large view" />
+        <div
+          id="modalLinks"
+          style="
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+          "
+        ></div>
       </div>
     </div>
 
     <script>
-      /* ===== CONFIG ===== */
-      const LOADER_MS = 4500; // loader duration in ms
-      const grid = document.getElementById("grid");
-      const searchInput = document.getElementById("searchInput");
-      const clearBtn = document.getElementById("clearBtn");
-      const loaderWrap = document.getElementById("loaderWrap");
-      const mainContent = document.getElementById("mainContent");
-      const monthMap = {
-        jan: "01",
-        january: "01",
-        feb: "02",
-        february: "02",
-        mar: "03",
-        march: "03",
-        apr: "04",
-        april: "04",
-        may: "05",
-        jun: "06",
-        june: "06",
-        jul: "07",
-        july: "07",
-        aug: "08",
-        august: "08",
-        sep: "09",
-        sept: "09",
-        september: "09",
-        oct: "10",
-        october: "10",
-        nov: "11",
-        november: "11",
-        dec: "12",
-        december: "12",
-      };
+      /* ===== config ===== */
+      const LOADER_MS = 4500; // loader visible duration (ms)
+      const QR_PLACEHOLDER_SVG = encodeURIComponent(
+        `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'>
+    <rect width='100%' height='100%' fill='#0b1416'/>
+    <g fill='#9bd7c9'>
+      <rect x='26' y='26' width='90' height='90' rx='12'/>
+      <rect x='284' y='26' width='90' height='90' rx='12'/>
+      <rect x='26' y='284' width='90' height='90' rx='12'/>
+      <!-- some squares to mimic small qr -->
+      <rect x='150' y='150' width='20' height='20'/>
+      <rect x='176' y='150' width='12' height='12'/>
+      <rect x='160' y='176' width='10' height='10'/>
+      <rect x='200' y='160' width='12' height='12'/>
+      <rect x='224' y='180' width='10' height='10'/>
+    </g>
+  </svg>`
+      );
+      const QR_PLACEHOLDER = `data:image/svg+xml;utf8,${QR_PLACEHOLDER_SVG}`;
 
-      /* create an inline QR-looking SVG as placeholder (we will encode at runtime) */
-      const qrSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-  <rect width='100' height='100' fill='#0b1717'/>
-  <rect x='6' y='6' width='28' height='28' fill='#fff'/>
-  <rect x='10' y='10' width='20' height='20' fill='#0b1717'/>
-  <rect x='64' y='6' width='28' height='28' fill='#fff'/>
-  <rect x='68' y='10' width='20' height='20' fill='#0b1717'/>
-  <rect x='6' y='64' width='28' height='28' fill='#fff'/>
-  <rect x='10' y='68' width='20' height='20' fill='#0b1717'/>
-  <!-- some inner squares -->
-  <rect x='40' y='42' width='8' height='8' fill='#fff'/>
-  <rect x='52' y='52' width='6' height='6' fill='#fff'/>
-</svg>`;
-      const PLACEHOLDER_QR =
-        "data:image/svg+xml;utf8," + encodeURIComponent(qrSvg);
-
-      /* ===== sample cards (with many entries) ===== */
+      /* ===== demo card data (each card will have 7 slots by default) =====
+   When you want to change images later, edit the qrImages array entries.
+*/
       let cards = [
         {
-          id: 1,
+          id: 101,
           invoice: "INV-1001",
           date: "2025-11-10",
           location: "Mumbai Port",
           status: "completed",
           batches: ["MB-211", "MB-212", "MB-300A"],
-          qrImages: [{ url: PLACEHOLDER_QR }, { url: PLACEHOLDER_QR }],
+          qrImages: [],
         },
         {
-          id: 2,
+          id: 102,
           invoice: "INV-1023",
           date: "2025-11-18",
           location: "Nhava Sheva",
@@ -708,25 +673,25 @@
           qrImages: [],
         },
         {
-          id: 3,
+          id: 103,
           invoice: "INV-1029",
           date: "2025-11-21",
           location: "Tuticorin",
           status: "completed",
           batches: ["MB-111", "MB-112", "MB-113", "MB-114"],
-          qrImages: [{ url: PLACEHOLDER_QR }],
+          qrImages: [],
         },
         {
-          id: 4,
+          id: 104,
           invoice: "INV-1035",
-          date: "2025-11-22",
-          location: "Chennai Port",
-          status: "completed",
-          batches: ["MB-201"],
-          qrImages: [{ url: PLACEHOLDER_QR }],
+          date: "2025-12-02",
+          location: "Mumbai Port",
+          status: "pending",
+          batches: ["MB-601", "MB-602"],
+          qrImages: [],
         },
         {
-          id: 5,
+          id: 105,
           invoice: "INV-1040",
           date: "2025-11-23",
           location: "Kolkata Port",
@@ -735,7 +700,7 @@
           qrImages: [],
         },
         {
-          id: 6,
+          id: 106,
           invoice: "INV-1045",
           date: "2025-11-24",
           location: "Cochin Port",
@@ -743,279 +708,334 @@
           batches: ["MB-401", "MB-402", "MB-403"],
           qrImages: [],
         },
-        {
-          id: 7,
-          invoice: "INV-1050",
-          date: "2025-12-02",
-          location: "Mumbai Port",
-          status: "pending",
-          batches: ["MB-601", "MB-602"],
-          qrImages: [],
-        },
-        {
-          id: 8,
-          invoice: "INV-1053",
-          date: "2025-12-15",
-          location: "Nhava Sheva",
-          status: "completed",
-          batches: ["MB-651"],
-          qrImages: [],
-        },
-        {
-          id: 9,
-          invoice: "INV-1055",
-          date: "2026-02-02",
-          location: "Tuticorin",
-          status: "pending",
-          batches: ["MB-700"],
-          qrImages: [{ url: PLACEHOLDER_QR }],
-        },
-        {
-          id: 10,
-          invoice: "INV-1060",
-          date: "2025-12-20",
-          location: "Kochi Port",
-          status: "completed",
-          batches: ["MB-801"],
-          qrImages: [],
-        },
-        {
-          id: 11,
-          invoice: "INV-1065",
-          date: "2026-01-05",
-          location: "Vizag Port",
-          status: "pending",
-          batches: ["MB-901", "MB-902"],
-          qrImages: [],
-        },
-        {
-          id: 12,
-          invoice: "INV-1070",
-          date: "2026-01-20",
-          location: "Mormugao",
-          status: "completed",
-          batches: ["MB-1001"],
-          qrImages: [],
-        },
-        {
-          id: 13,
-          invoice: "INV-1075",
-          date: "2026-02-10",
-          location: "Paradip",
-          status: "pending",
-          batches: ["MB-1101"],
-          qrImages: [],
-        },
-        {
-          id: 14,
-          invoice: "INV-1080",
-          date: "2026-02-18",
-          location: "Ennore",
-          status: "completed",
-          batches: ["MB-1201"],
-          qrImages: [],
-        },
-        {
-          id: 15,
-          invoice: "INV-1085",
-          date: "2026-03-01",
-          location: "Kandla",
-          status: "pending",
-          batches: ["MB-1301"],
-          qrImages: [],
-        },
       ];
 
-      /* ensure exactly 7 slots per card (fills with QR placeholder) */
-      function ensureSevenImages() {
-        cards.forEach((c) => {
-          c.qrImages = Array.isArray(c.qrImages) ? c.qrImages.slice() : [];
-          while (c.qrImages.length < 7) {
-            c.qrImages.push({ url: PLACEHOLDER_QR, links: [] });
+      // Add 6 more cards on request — keep structure consistent and give each 7 placeholders
+      for (let i = 107; i <= 112; i++) {
+        cards.push({
+          id: i,
+          invoice: `INV-${1000 + i}`,
+          date: randomDateString(),
+          location: [
+            "Mumbai Port",
+            "Kandla",
+            "Tuticorin",
+            "Nhava Sheva",
+            "Cochin Port",
+          ][i % 5],
+          status: i % 2 === 0 ? "completed" : "pending",
+          batches: [`MB-${100 + i}`, `MB-${110 + i}`].slice(0, (i % 3) + 1),
+          qrImages: [
+            /* filled below */
+          ],
+        });
+      }
+
+      // Helper to populate each card with 7 placeholder QR images (can be replaced by real local URLs)
+      cards = cards.map((c) => {
+        // ensure exactly 7 slots; if you want fewer in future, set shorter array
+        const imgs = [];
+        for (let k = 0; k < 7; k++) {
+          imgs.push({ url: QR_PLACEHOLDER, links: [] });
+        }
+        return { ...c, qrImages: imgs };
+      });
+
+      /* utility: random date generator for demo cards (2025-11..2026-03) */
+      function randomDateString() {
+        const start = new Date(2025, 10, 1).getTime();
+        const end = new Date(2026, 2, 28).getTime();
+        const d = new Date(start + Math.random() * (end - start));
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}-${String(d.getDate()).padStart(2, "0")}`;
+      }
+
+      /* sort state (true => newest first) */
+      let newestFirst = true;
+
+      /* cached DOM */
+      const grid = document.getElementById("grid");
+      const loader = document.getElementById("loader");
+      const modalBackdrop = document.getElementById("modalBackdrop");
+      const modalImage = document.getElementById("modalImage");
+      const modalLinks = document.getElementById("modalLinks");
+      const modalTitle = document.getElementById("modalTitle");
+
+      const searchInput = document.getElementById("searchInput");
+      const clearSearch = document.getElementById("clearSearch");
+      const searchInputMobile = document.getElementById("searchInputMobile");
+      const clearSearchMobile = document.getElementById("clearSearchMobile");
+      const sortBtn = document.getElementById("sortBtn");
+      const sortIcon = document.getElementById("sortIcon");
+
+      /* month maps for search */
+      const monthMap = {
+        jan: 1,
+        january: 1,
+        feb: 2,
+        february: 2,
+        mar: 3,
+        march: 3,
+        apr: 4,
+        april: 4,
+        may: 5,
+        jun: 6,
+        june: 6,
+        jul: 7,
+        july: 7,
+        aug: 8,
+        august: 8,
+        sep: 9,
+        sept: 9,
+        september: 9,
+        oct: 10,
+        october: 10,
+        nov: 11,
+        november: 11,
+        dec: 12,
+        december: 12,
+      };
+
+      /* show loader then render content */
+      window.addEventListener("load", () => {
+        // show loader for LOADER_MS then render
+        setTimeout(() => {
+          loader.style.display = "none";
+          renderSortedAndFiltered();
+          // show mobile search area if narrow
+          if (window.innerWidth <= 720)
+            document.querySelector(".search-mobile").style.display = "block";
+        }, LOADER_MS);
+      });
+
+      /* Sorting toggle */
+      sortBtn.addEventListener("click", () => {
+        newestFirst = !newestFirst;
+        // rotate icon slightly to convey direction (simple visual)
+        sortIcon.style.transform = newestFirst
+          ? "rotate(0deg)"
+          : "rotate(180deg)";
+        renderSortedAndFiltered();
+      });
+
+      /* Search handlers */
+      function setClearVisibility(inputEl, clearBtn) {
+        if (inputEl.value && inputEl.value.trim() !== "")
+          clearBtn.style.display = "inline";
+        else clearBtn.style.display = "none";
+      }
+      searchInput.addEventListener("input", () => {
+        setClearVisibility(searchInput, clearSearch);
+        renderSortedAndFiltered();
+      });
+      clearSearch.addEventListener("click", () => {
+        searchInput.value = "";
+        setClearVisibility(searchInput, clearSearch);
+        renderSortedAndFiltered();
+      });
+
+      searchInputMobile.addEventListener("input", () => {
+        setClearVisibility(searchInputMobile, clearSearchMobile);
+        renderSortedAndFiltered();
+      });
+      clearSearchMobile.addEventListener("click", () => {
+        searchInputMobile.value = "";
+        setClearVisibility(searchInputMobile, clearSearchMobile);
+        renderSortedAndFiltered();
+      });
+
+      /* Helper: parse query -> filter cards */
+      function matchesCard(card, q) {
+        if (!q) return true;
+        q = q.trim().toLowerCase();
+        // Invoice
+        if (card.invoice && card.invoice.toLowerCase().includes(q)) return true;
+        // location
+        if (card.location && card.location.toLowerCase().includes(q))
+          return true;
+        // batch codes
+        if (
+          card.batches &&
+          card.batches.some((b) => b.toLowerCase().includes(q))
+        )
+          return true;
+        // direct date match (yyyy-mm-dd)
+        if (card.date && card.date.toLowerCase().includes(q)) return true;
+        // month words: if the query is a month word (jan / feb / january)
+        const qclean = q.replace(/\./g, "");
+        if (monthMap[qclean]) {
+          const mon = monthMap[qclean];
+          // card.date like YYYY-MM-DD; extract month
+          const dparts = card.date.split("-");
+          if (dparts[1] && Number(dparts[1]) === mon) return true;
+        }
+        // also allow "jan 2025" or "nov 2025" (look for month name inside date or card fields)
+        const monthNames = Object.keys(monthMap);
+        for (const name of monthNames) {
+          if (q.includes(name)) {
+            // test
+            const mon = monthMap[name];
+            const dparts = card.date.split("-");
+            if (dparts[1] && Number(dparts[1]) === mon) return true;
           }
-        });
+        }
+        return false;
       }
 
-      /* sorting + search */
-      let sortNewestFirst = true;
-      function sortCardsList() {
-        cards.sort((a, b) => {
-          const da = new Date(a.date + "T00:00:00"),
-            db = new Date(b.date + "T00:00:00");
-          if (isNaN(da) || isNaN(db)) return 0;
-          return sortNewestFirst ? db - da : da - db;
+      /* render with current sort and filter */
+      function renderSortedAndFiltered() {
+        const q = (
+          window.innerWidth <= 720
+            ? searchInputMobile.value || ""
+            : searchInput.value || ""
+        ).trim();
+        // sort by date
+        const sorted = [...cards].sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return newestFirst ? db - da : da - db;
         });
+        // filter by search
+        const filtered = sorted.filter((c) => matchesCard(c, q.toLowerCase()));
+        renderGrid(filtered);
       }
 
-      function render() {
-        sortCardsList();
-        const q = (searchInput.value || "").trim().toLowerCase();
+      /* render cards into grid */
+      function renderGrid(list) {
         grid.innerHTML = "";
-        const filtered = cards.filter((c) => {
-          if (!q) return true;
-          const invoice = (c.invoice || "").toLowerCase();
-          const loc = (c.location || "").toLowerCase();
-          const batches = (c.batches || []).join(" ").toLowerCase();
-          const date = (c.date || "").toLowerCase();
-          const monNorm = monthMap[q] || null;
-          let monthMatches = false;
-          if (monNorm && c.date) {
-            const cardMon = (c.date || "").slice(5, 7);
-            monthMatches = cardMon === monNorm;
-          }
-          return (
-            invoice.includes(q) ||
-            loc.includes(q) ||
-            batches.includes(q) ||
-            date.includes(q) ||
-            monthMatches
-          );
-        });
-
-        filtered.forEach((c) => {
-          const thumbsId = "thumbs-" + c.id;
-          const el = document.createElement("article");
-          el.className = "card";
-          el.innerHTML = `
+        list.forEach((card) => {
+          const article = document.createElement("article");
+          article.className = "card";
+          article.innerHTML = `
       <div class="card-head">
-        <div class="logo" aria-hidden="true" style="width:44px;height:44px;border-radius:10px;background:#e7fbf5;color:#0a6b5c;display:flex;align-items:center;justify-content:center;font-weight:800">QR</div>
-        <div class="title-block">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="color:var(--muted);font-size:13px;margin-bottom:4px">Shipment Invoice#</div>
-              <div class="title">${c.invoice}</div>
-            </div>
-          </div>
-          <div class="meta-row" style="margin-top:8px">
-            <div class="meta-item"><svg class="icon-small" viewBox="0 0 24 24" width="16" height="16"><path d="M8 7V3M16 7V3M3 11h18M5 21h14a1 1 0 001-1V7a1 1 0 00-1-1H5a1 1 0 00-1 1v13a1 1 0 001 1z" stroke="#9aa7b2" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <div style="display:flex;flex-direction:column;margin-left:6px"><div class="meta-strong">${
-                c.date
-              }</div><div class="muted" style="font-size:12px">Container date</div></div></div>
-
-            <div class="meta-item"><svg class="icon-small" viewBox="0 0 24 24" width="16" height="16"><path d="M12 21s7-4.5 7-10a7 7 0 10-14 0c0 5.5 7 10 7 10z" stroke="#9aa7b2" stroke-width="1.2" fill="none"/></svg>
-              <div style="display:flex;flex-direction:column;margin-left:6px"><div class="meta-strong">${
-                c.location
-              }</div><div class="muted" style="font-size:12px">Port</div></div></div>
-
+        <div class="brand-logo" aria-hidden="true">QR</div>
+        <div class="meta">
+          <div class="invoice">Shipment ${card.invoice}</div>
+          <div class="small-meta">
+            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 11l5-5 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="font-weight:700">${
+              card.date
+            }</div></div>
+            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-4.5 7-10a7 7 0 10-14 0c0 5.5 7 10 7 10z" stroke="currentColor" stroke-width="1.2"/></svg><div style="font-weight:700">${
+              card.location
+            }</div></div>
           </div>
         </div>
       </div>
 
       <div class="card-body">
         <div class="row"><div class="label">Status</div><div class="value"><div class="pill ${
-          c.status === "completed" ? "done" : "pending"
-        }">${
-            c.status === "completed" ? "Completed" : "Pending"
+          card.status === "completed" ? "done" : "pending"
+        }" style="display:inline-block;padding:8px 16px;border-radius:28px;background:${
+            card.status === "completed"
+              ? "linear-gradient(180deg,#16a34a,#0ea25a)"
+              : "linear-gradient(180deg,#ef4444,#ef6b6b)"
+          };font-weight:700;color:#fff">${
+            card.status === "completed" ? "Completed" : "Pending"
           }</div></div></div>
+
         <div class="row"><div class="label">Material Batch</div><div class="value chips">${(
-          c.batches || []
+          card.batches || []
         )
           .map((b) => `<span class="chip">${b}</span>`)
           .join("")}</div></div>
-        <div class="row"><div class="label">QR Code(s)</div><div class="value"><div id="${thumbsId}" class="thumbs">
-          ${(c.qrImages || [])
-            .map(
-              (img, idx) =>
-                `<div class="thumb" data-card="${
-                  c.id
-                }" data-index="${idx}" title="Open QR ${idx + 1}"><img src="${
-                  img.url
-                }" alt="qr-${
-                  c.id
-                }-${idx}" loading="lazy" onerror="handleBrokenImage(this)"/><div class="fallback">Image not found</div></div>`
-            )
-            .join("")}
-        </div></div></div>
+
+        <div class="row">
+          <div class="label">QR Code(s)</div>
+          <div class="value thumbs" id="thumbs-${card.id}"></div>
+        </div>
       </div>
     `;
-          grid.appendChild(el);
+          grid.appendChild(article);
 
-          const thumbsEl = document.getElementById(thumbsId);
-          if (thumbsEl) {
-            const count = (c.qrImages || []).length || 0;
-            let cols = 3;
-            if (count <= 1) cols = 1;
-            else if (count === 2) cols = 2;
-            else cols = 3;
-            thumbsEl.style.gridTemplateColumns = `repeat(${cols}, minmax(90px, 1fr))`;
+          // populate thumbs (exactly 7 slots; card.qrImages may be any length, but we enforce 7 visual slots)
+          const thumbsEl = article.querySelector(`#thumbs-${card.id}`);
+          const slots = 7;
+          for (let i = 0; i < slots; i++) {
+            const imgObj =
+              card.qrImages && card.qrImages[i] ? card.qrImages[i] : null;
+            const thumb = document.createElement("div");
+            thumb.className = "thumb";
+            thumb.dataset.card = card.id;
+            thumb.dataset.index = i;
+            if (imgObj && imgObj.url) {
+              const img = document.createElement("img");
+              img.src = imgObj.url;
+              img.alt = `qr-${card.id}-${i}`;
+              img.loading = "lazy";
+              img.onerror = function () {
+                this.style.display = "none";
+                const f = this.parentElement.querySelector(".fallback");
+                if (f) f.style.display = "flex";
+              };
+              thumb.appendChild(img);
+            } else {
+              // no image: show fallback
+              const f = document.createElement("div");
+              f.className = "fallback";
+              f.textContent = "No image";
+              thumb.appendChild(f);
+            }
+            thumbsEl.appendChild(thumb);
+
+            // click opens modal only if image exists
+            thumb.addEventListener("click", () => {
+              if (imgObj && imgObj.url) {
+                openModal(card.id, i);
+              } else {
+                // toast
+                Swal.fire({
+                  toast: true,
+                  position: "top-end",
+                  icon: "info",
+                  title: "Image not available",
+                  showConfirmButton: false,
+                  timer: 1200,
+                  background: "#0b1717",
+                });
+              }
+            });
           }
         });
 
-        attachThumbHandlers();
+        // ensure grid top padding prevents header overlap
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
-      /* broken image fallback */
-      function handleBrokenImage(img) {
-        try {
-          img.style.display = "none";
-          const parent = img.closest(".thumb");
-          if (parent) {
-            const fallback = parent.querySelector(".fallback");
-            if (fallback) fallback.style.display = "flex";
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-
-      /* modal */
-      const modalBackdrop = document.getElementById("modalBackdrop");
-      const modalImage = document.getElementById("modalImage");
-      const modalLinks = document.getElementById("modalLinks");
-      const modalTitle = document.getElementById("modalTitle");
+      /* modal open/close */
       document
         .getElementById("modalClose")
         .addEventListener("click", closeModal);
-      modalBackdrop.addEventListener("click", (e) => {
-        if (e.target === modalBackdrop) closeModal();
-      });
-
-      function attachThumbHandlers() {
-        document.querySelectorAll(".thumb").forEach((t) => {
-          t.addEventListener("click", () => {
-            const cardId = Number(t.getAttribute("data-card")),
-              idx = Number(t.getAttribute("data-index"));
-            const card = cards.find((x) => x.id === cardId);
-            if (!card) return;
-            const imgObj = card.qrImages[idx];
-            if (!imgObj) return;
-            const imgTag = t.querySelector("img");
-            if (imgTag && imgTag.style.display === "none") {
-              Swal.fire({
-                toast: true,
-                position: "top-end",
-                icon: "info",
-                title: "Image not available",
-                showConfirmButton: false,
-                timer: 900,
-              });
-              return;
-            }
-            openModal(card, imgObj, idx);
-          });
-        });
-      }
-      function openModal(card, imgObj, idx) {
-        modalTitle.textContent = `${card.invoice} — QR ${idx + 1}`;
+      function openModal(cardId, idx) {
+        const card = cards.find((c) => c.id == cardId);
+        if (!card) return;
+        const imgObj = card.qrImages[idx];
+        if (!imgObj) return;
         modalImage.src = imgObj.url;
+        modalTitle.textContent = `${card.invoice} — QR ${idx + 1}`;
         modalLinks.innerHTML = "";
-        const links = imgObj.links || [];
-        if (links.length === 0) {
+        (imgObj.links || []).forEach((l) => {
+          const r = document.createElement("div");
+          r.style.width = "100%";
+          r.style.maxWidth = "760px";
+          r.style.background = "rgba(255,255,255,0.02)";
+          r.style.padding = "8px 12px";
+          r.style.borderRadius = "8px";
+          r.innerHTML = `<a href="${l}" target="_blank" style="color:var(--accent);text-decoration:underline">${l}</a> <button class="copy" data-link="${l}" style="float:right;background:transparent;border:1px solid rgba(255,255,255,0.06);color:#e6eef8;padding:6px 8px;border-radius:6px;cursor:pointer">Copy</button>`;
+          modalLinks.appendChild(r);
+        });
+        if ((imgObj.links || []).length === 0) {
           const d = document.createElement("div");
-          d.textContent = "No links attached to this QR";
-          d.className = "muted";
+          d.style.color = "var(--muted)";
+          d.textContent = "No links attached";
           modalLinks.appendChild(d);
         } else {
-          links.forEach((l) => {
-            const row = document.createElement("div");
-            row.className = "link-row";
-            row.innerHTML = `<a href="${l}" target="_blank" rel="noopener noreferrer">${l}</a><button class="icon-like copy-btn" data-link="${l}">Copy</button>`;
-            modalLinks.appendChild(row);
-          });
-          modalLinks.querySelectorAll(".copy-btn").forEach((b) =>
-            b.addEventListener("click", () => {
+          modalLinks.querySelectorAll(".copy").forEach((b) =>
+            b.addEventListener("click", (ev) => {
+              const l = b.getAttribute("data-link");
               navigator.clipboard
-                .writeText(b.dataset.link)
+                .writeText(l)
                 .then(() =>
                   Swal.fire({
                     toast: true,
@@ -1023,7 +1043,7 @@
                     icon: "success",
                     title: "Copied",
                     showConfirmButton: false,
-                    timer: 800,
+                    timer: 900,
                   })
                 );
             })
@@ -1039,55 +1059,33 @@
         modalLinks.innerHTML = "";
       }
 
-      /* search + clear */
-      searchInput.addEventListener("input", () => {
-        const v = searchInput.value.trim();
-        clearBtn.classList.toggle("hidden", v.length === 0);
-        render();
-      });
-      clearBtn.addEventListener("click", () => {
-        searchInput.value = "";
-        clearBtn.classList.add("hidden");
-        render();
-      });
+      /* ensure toast above header */
+      const style = document.createElement("style");
+      style.innerHTML = `.swal2-container{z-index:12000 !important}`;
+      document.head.appendChild(style);
 
-      /* sort toggle */
-      const sortToggle = document.getElementById("sortToggle");
-      sortToggle.addEventListener("click", () => {
-        sortNewestFirst = !sortNewestFirst;
-        const icon = document.getElementById("sortIcon");
-        icon.style.transform = sortNewestFirst
-          ? "rotate(0deg)"
-          : "rotate(180deg)";
-        sortToggle.classList.add("active");
-        setTimeout(() => sortToggle.classList.remove("active"), 120);
-        render();
-      });
-      sortToggle.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        sortToggle.click();
-      });
-
-      /* initial flow:
-   1) ensure 7 image slots
-   2) show loader (already visible by default)
-   3) after LOADER_MS hide loader and reveal main content and render
-*/
-      ensureSevenImages();
-      window.addEventListener("load", () => {
-        // keep loader visible then reveal after LOADER_MS
-        setTimeout(() => {
-          loaderWrap.style.display = "none";
-          loaderWrap.setAttribute("aria-hidden", "true");
-          mainContent.style.visibility = "visible";
-          mainContent.style.opacity = "1";
-          render();
-        }, LOADER_MS);
-      });
-
-      /* accessibility */
+      /* keyboard close modal */
       window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeModal();
+        if (e.key === "Escape" && modalBackdrop.style.display === "flex")
+          closeModal();
+      });
+
+      /* responsive: show mobile search under header if needed */
+      function handleResponsive() {
+        if (window.innerWidth <= 720) {
+          document.querySelector(".search-mobile").style.display = "block";
+          // sync values
+          searchInputMobile.value = searchInput.value;
+          setClearVisibility(searchInputMobile, clearSearchMobile);
+        } else {
+          document.querySelector(".search-mobile").style.display = "none";
+        }
+      }
+      window.addEventListener("resize", handleResponsive);
+
+      /* initial small delay to make sure grid doesn't jump under header */
+      document.addEventListener("DOMContentLoaded", () => {
+        handleResponsive();
       });
     </script>
   </body>
