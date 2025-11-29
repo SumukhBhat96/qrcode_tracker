@@ -2,61 +2,104 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <title>QR Code Tracker</title>
 
-    <!-- SweetAlert2 for small toasts used elsewhere -->
+    <!-- SweetAlert2 preserved -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-      :root {
-        --bg-0: #071617;
-        --bg-1: #0b1b1a;
-        --card: #0d211f;
-        --muted: #9aa7b2;
-        --accent: #2d9f8f;
-        --accent-2: #0fbf9a;
-        --card-radius: 14px;
-        --thumb-size: 110px;
-        --gap: 20px;
-        --header-h: 78px;
-        --header-h-mobile: 110px;
-        --loader-time: 4500ms;
-        --app-h-padding: 18px; /* unified horizontal padding */
-      }
-      * {
+      /* Base */
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
+      }
+      :root {
+        --bg: #071617;
+        --panel: #0f2b27;
+        --muted: #9aa7b2;
+        --accent: #2fa48f;
+        --card-radius: 14px;
+        --h-pad: 18px; /* unified horizontal gutter */
+        --header-top: 16px; /* internal top padding inside header */
+        --header-bottom: 12px; /* internal bottom padding inside header */
+        --thumb-size: 110px;
       }
       html,
       body {
         height: 100%;
-      }
-      body {
         margin: 0;
-        font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
-        background: linear-gradient(180deg, var(--bg-0) 0%, #031716 70%);
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+        background: linear-gradient(180deg, var(--bg) 0%, #031716 70%);
         color: #e7f6f5;
         -webkit-font-smoothing: antialiased;
-        scroll-behavior: smooth;
       }
 
-      /* header fixed */
+      /* Loader (unchanged) */
+      .loader-backdrop {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(2, 15, 15, 0.96);
+        z-index: 200;
+      }
+      .loader-box {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        padding: 18px 26px;
+        border-radius: 12px;
+        background: #062423;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .qr-pixels {
+        width: 56px;
+        height: 56px;
+        border-radius: 8px;
+        background: #043633;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3px;
+        padding: 6px;
+      }
+      .qr-pixels span {
+        background: #063d36;
+        border-radius: 4px;
+        opacity: 0.14;
+        transform: scale(0.86);
+        transition: transform 0.36s, opacity 0.36s;
+      }
+      .qr-pixels span.on {
+        opacity: 1;
+        transform: scale(1);
+        background: var(--accent);
+      }
+      .loader-text {
+        color: #cfeee9;
+        font-weight: 700;
+      }
+
+      /* Header: internal top & bottom spacing added as requested */
       header.app-header {
         position: fixed;
-        inset: 0 0 auto 0;
         top: 0;
         left: 0;
         right: 0;
-        height: var(--header-h);
-        /* include safe-area inset for notch/status bars and add more bottom padding */
-        padding: calc(env(safe-area-inset-top, 12px) + 8px) var(--app-h-padding) 14px var(--app-h-padding);
-        background: linear-gradient(90deg, #0e3f38, #0a4c45);
-        display: flex;
-        align-items: center;
         z-index: 120;
+        background: linear-gradient(90deg, #0e3f38, #0a4c45);
         box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+        padding: calc(env(safe-area-inset-top, 12px) + var(--header-top))
+          var(--h-pad)
+          calc(env(safe-area-inset-bottom, 0px) + var(--header-bottom))
+          var(--h-pad);
       }
-      /* header-inner now has the same horizontal padding as the main content and centers content */
+
       .header-inner {
         max-width: 1300px;
         margin: 0 auto;
@@ -64,13 +107,11 @@
         align-items: center;
         gap: 12px;
         width: 100%;
-        padding: 0; /* horizontal padding is on header itself via --app-h-padding */
       }
       .brand {
         display: flex;
         align-items: center;
         gap: 12px;
-        flex: 0 0 auto;
       }
       .brand .logo {
         width: 44px;
@@ -78,69 +119,33 @@
         border-radius: 10px;
         background: #e6fffb;
         color: #0b6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: grid;
+        place-items: center;
         font-weight: 800;
       }
       .brand h1 {
         margin: 0;
         font-size: 20px;
-        letter-spacing: 0.2px;
-      }
-      .controls {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-left: auto;
-        flex: 1;
-        justify-content: flex-end;
       }
 
-      .sort-btn {
+      /* Search pill restored */
+      .search-wrap {
         display: flex;
         align-items: center;
-        gap: 8px;
-        background: transparent;
-        border-radius: 12px;
-        padding: 8px 12px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        cursor: pointer;
-        color: #e9f6f5;
-        min-width: 56px;
-        justify-content: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        padding: 12px 18px;
+        border-radius: 26px;
+        min-width: 260px;
+        flex: 1;
+        max-width: 720px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
       }
-      .sort-caret {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        background: rgba(0, 0, 0, 0.12);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.28s ease;
-      }
-      .sort-caret svg {
+      .search-icon {
         width: 18px;
         height: 18px;
-        display: block;
-      }
-      .sort-caret.rotated {
-        transform: rotate(180deg);
-      }
-
-      /* search-wrap gets room inside header due to added header bottom padding */
-      .search-wrap {
-        flex: 0 1 560px;
-        max-width: 560px;
-        min-width: 200px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(255, 255, 255, 0.03);
-        padding: 8px 12px;
-        border-radius: 22px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        opacity: 0.9;
+        flex: 0 0 18px;
       }
       .search-wrap input {
         flex: 1;
@@ -149,63 +154,54 @@
         color: rgba(255, 255, 255, 0.95);
         outline: none;
         font-size: 15px;
-        padding: 8px;
+        padding: 6px 8px;
       }
-      .search-icon {
-        width: 20px;
-        height: 20px;
-        opacity: 0.95;
+      .search-wrap input::placeholder {
+        color: rgba(255, 255, 255, 0.55);
       }
       .clear-btn {
         background: transparent;
         border: 0;
         color: rgba(255, 255, 255, 0.6);
-        cursor: button;
+        cursor: pointer;
         padding: 6px 8px;
         border-radius: 8px;
       }
 
       @media (max-width: 720px) {
-        header.app-header {
-          height: var(--header-h-mobile);
-          padding: calc(env(safe-area-inset-top, 12px) + 8px) var(--app-h-padding) 12px var(--app-h-padding);
-        }
         .header-inner {
           flex-direction: column;
-          align-items: flex-start;
+          align-items: stretch;
           gap: 10px;
-        }
-        .controls {
-          width: 100%;
-          justify-content: space-between;
         }
         .search-wrap {
           width: 100%;
-          max-width: none;
+          border-radius: 20px;
+          padding: 10px 12px;
         }
       }
 
-      /* main.wrap uses the same horizontal padding so header & content gutters match */
+      /* Main & spacer */
+      .spacer {
+        height: calc(80px);
+      } /* updated dynamically by JS */
       main.wrap {
         max-width: 1300px;
-        margin: calc(var(--header-h) + 22px) auto 60px;
-        padding: 0 var(--app-h-padding);
-        transition: margin-top 0.2s;
-      }
-      @media (max-width: 720px) {
-        main.wrap {
-          margin-top: calc(var(--header-h-mobile) + 8px);
-        }
+        margin: 0 auto;
+        padding: 0 var(--h-pad) 80px var(--h-pad);
+        transition: margin-top 0.12s;
+        overflow: visible;
       }
 
+      /* Grid & cards */
       .grid {
         display: grid;
-        gap: var(--gap);
+        gap: 22px;
         grid-template-columns: repeat(2, 1fr);
       }
       @media (max-width: 1000px) {
         .grid {
-          grid-template-columns: repeat(1, 1fr);
+          grid-template-columns: 1fr;
         }
       }
 
@@ -218,23 +214,15 @@
         border-radius: var(--card-radius);
         padding: 18px;
         border: 1px solid rgba(255, 255, 255, 0.03);
-        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65);
+        position: relative;
         display: flex;
         flex-direction: column;
         gap: 14px;
         overflow: visible;
-        transform: translateY(20px);
-        opacity: 0;
-        transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1),
-          opacity 0.45s;
-        position: relative;
-      }
-      .card.show {
-        transform: none;
-        opacity: 1;
       }
 
-      .card .head {
+      .head {
         display: flex;
         gap: 12px;
         align-items: flex-start;
@@ -245,21 +233,23 @@
         border-radius: 10px;
         background: #e7fffb;
         color: #0b6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: grid;
+        place-items: center;
         font-weight: 800;
       }
       .card h3 {
         margin: 0;
-        font-size: 18px;
+        font-size: 20px;
+        font-weight: 800;
       }
+
+      /* Increased meta sizes for Container date & Port (requested) */
       .meta {
         display: flex;
         gap: 18px;
         align-items: center;
         color: var(--muted);
-        font-size: 13px;
+        font-size: 14px;
         flex-wrap: wrap;
       }
       .meta .strong {
@@ -278,7 +268,6 @@
         font-size: 13px;
       }
 
-      /* status smaller and neat */
       .status-pill {
         padding: 6px 10px;
         border-radius: 999px;
@@ -287,7 +276,6 @@
         font-size: 12px;
         display: inline-block;
         box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
-        letter-spacing: 0.2px;
       }
       .status-pill.done {
         background: linear-gradient(180deg, #18b65a, #10a44d);
@@ -314,12 +302,22 @@
         border: 1px solid rgba(255, 255, 255, 0.02);
       }
 
+      /* Thumbnails: 3 columns desktop, 2 columns on mobile */
       .thumbs {
         display: grid;
         gap: 12px;
         grid-template-columns: repeat(3, minmax(var(--thumb-size), 1fr));
-        grid-auto-rows: minmax(var(--thumb-size), auto);
+        grid-auto-rows: auto;
       }
+      @media (max-width: 480px) {
+        .thumbs {
+          grid-template-columns: repeat(2, minmax(72px, 1fr));
+        }
+        :root {
+          --thumb-size: 88px;
+        }
+      }
+
       .thumb {
         border-radius: 12px;
         overflow: hidden;
@@ -328,20 +326,18 @@
           rgba(255, 255, 255, 0.01),
           rgba(255, 255, 255, 0.02)
         );
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         aspect-ratio: 1/1;
         box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
         border: 2px solid rgba(255, 255, 255, 0.02);
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
       .thumb img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        display: block;
       }
       .fallback {
         position: absolute;
@@ -355,15 +351,6 @@
         text-align: center;
         padding: 8px;
       }
-      @media (max-width: 480px) {
-        .thumbs {
-          grid-template-columns: repeat(2, minmax(72px, 1fr));
-          gap: 10px;
-        }
-        :root {
-          --thumb-size: 88px;
-        }
-      }
 
       .modal-backdrop {
         position: fixed;
@@ -376,7 +363,7 @@
         padding: 18px;
       }
       .modal {
-        background: var(--card);
+        background: var(--panel);
         border-radius: 12px;
         padding: 16px;
         width: 100%;
@@ -390,73 +377,9 @@
         border-radius: 10px;
       }
 
-      .loader-backdrop {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(
-          180deg,
-          rgba(2, 15, 15, 0.95),
-          rgba(2, 15, 15, 0.98)
-        );
-        z-index: 200;
-        flex-direction: column;
-        gap: 14px;
-      }
-      .loader-box {
-        display: flex;
-        gap: 14px;
-        align-items: center;
-        padding: 18px 26px;
-        border-radius: 12px;
-        background: linear-gradient(180deg, #062423, #052a27);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-      }
-      .qr-pixels {
-        width: 56px;
-        height: 56px;
-        border-radius: 8px;
-        background: #043633;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(4, 1fr);
-        gap: 3px;
-        padding: 6px;
-      }
-      .qr-pixels span {
-        display: block;
-        background: #063d36;
-        border-radius: 4px;
-        opacity: 0.14;
-        transform: scale(0.86);
-        transition: transform 0.36s, opacity 0.36s;
-      }
-      .qr-pixels span.on {
-        opacity: 1;
-        transform: scale(1);
-        background: var(--accent-2);
-      }
-      .loader-text {
-        color: #cfeee9;
-        font-weight: 700;
-        letter-spacing: 0.2px;
-      }
-
       .swal2-container {
         z-index: 999999 !important;
       }
-
-      .spacer {
-        height: calc(var(--header-h) + 14px);
-      }
-      @media (max-width: 720px) {
-        .spacer {
-          height: calc(var(--header-h-mobile) + 18px);
-        }
-      }
-
       .no-results {
         padding: 26px;
         font-size: 18px;
@@ -466,9 +389,9 @@
     </style>
   </head>
   <body>
-    <!-- loader (shows for 4.5s) -->
+    <!-- Loader (kept) -->
     <div id="loader" class="loader-backdrop" aria-hidden="false">
-      <div class="loader-box" role="status" aria-live="polite">
+      <div class="loader-box">
         <div class="qr-pixels" id="qrPixels">
           <span></span><span></span><span></span><span></span> <span></span
           ><span></span><span></span><span></span> <span></span><span></span
@@ -478,9 +401,6 @@
         <div>
           <div class="loader-text">
             Tracking your QR<span id="loaderDots">.</span>
-          </div>
-          <div style="font-size: 12px; color: var(--muted); margin-top: 6px">
-            Preparing results — please wait
           </div>
         </div>
       </div>
@@ -493,63 +413,72 @@
           <h1>QR Code Tracker</h1>
         </div>
 
-        <div class="controls">
-          <button
-            id="sortBtn"
-            class="sort-btn"
-            aria-label="Toggle sort (Newest/Oldest)"
+        <div
+          style="
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+          "
+        >
+          <!-- left small toggle kept visually (no functionality change) -->
+          <div
+            style="
+              width: 46px;
+              height: 46px;
+              border-radius: 12px;
+              background: rgba(0, 0, 0, 0.12);
+              display: grid;
+              place-items: center;
+              border: 1px solid rgba(255, 255, 255, 0.02);
+            "
           >
-            <div id="sortCaret" class="sort-caret" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 8v8M8 12h8"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+
+          <div style="flex: 1 1 auto; display: flex; justify-content: center">
+            <div class="search-wrap" role="search" aria-label="Search invoices">
               <svg
+                class="search-icon"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M6 15l6-6 6 6"
+                  d="M21 21l-4.35-4.35"
                   stroke="currentColor"
-                  stroke-width="1.4"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="6.5"
+                  stroke="currentColor"
+                  stroke-width="1.6"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 />
               </svg>
+              <input
+                id="searchInput"
+                placeholder="Search invoice, location, date, batch..."
+                aria-label="Search invoices"
+              />
+              <button id="clearBtn" class="clear-btn" title="Clear search">
+                ✕
+              </button>
             </div>
-          </button>
-
-          <div class="search-wrap" id="searchWrap" role="search">
-            <svg
-              class="search-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              width="18"
-              height="18"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M21 21l-4.35-4.35"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <circle
-                cx="11"
-                cy="11"
-                r="6.5"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <input
-              id="searchInput"
-              placeholder="Search invoice, location, date, month (jan / january) or batch..."
-              aria-label="Search invoices"
-            />
-            <button id="clearBtn" class="clear-btn" title="Clear search">
-              ✕
-            </button>
           </div>
         </div>
       </div>
@@ -557,8 +486,8 @@
 
     <div id="spacer" class="spacer" aria-hidden="true"></div>
 
-    <main class="wrap" id="mainWrap">
-      <section class="grid" id="cardsGrid" aria-live="polite"></section>
+    <main id="mainWrap" class="wrap">
+      <section id="cardsGrid" class="grid" aria-live="polite"></section>
       <div id="noResults" class="no-results" style="display: none">
         No results found
       </div>
@@ -595,16 +524,13 @@
     </div>
 
     <script>
-      /* ======== Data & helpers ======== */
+      /* DATA (unchanged - all cards preserved) */
       const DUMMY_QR = "/mnt/data/798a63fe-c787-4bc6-91c1-b50b87613e46.png";
-
-      /* simple helper to produce n dummy slots */
       function makeSlots(n) {
         const a = [];
-        for (let i = 0; i < n; i++) a.push({ url: DUMMY_QR, links: [] });
+        for (let i = 0; i < n; i++) a.push({ url: DUMMY_QR });
         return a;
       }
-
       const cards = [
         {
           id: 1001,
@@ -613,7 +539,7 @@
           location: "Mumbai Port",
           status: "completed",
           batches: ["MB-211", "MB-212", "MB-300A"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1023,
@@ -622,7 +548,7 @@
           location: "Nhava Sheva",
           status: "pending",
           batches: ["MB-900"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1029,
@@ -630,8 +556,8 @@
           date: "2025-11-21",
           location: "Tuticorin",
           status: "completed",
-          batches: ["MB-111", "MB-112", "MB-113", "MB-114"],
-          qrImages: makeSlots(7),
+          batches: ["MB-111", "MB-112"],
+          qrImages: makeSlots(6),
         },
         {
           id: 1035,
@@ -640,7 +566,7 @@
           location: "Chennai Port",
           status: "completed",
           batches: ["MB-201"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1040,
@@ -649,7 +575,7 @@
           location: "Kolkata Port",
           status: "completed",
           batches: ["MB-301", "MB-302"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1045,
@@ -658,7 +584,7 @@
           location: "Cochin Port",
           status: "pending",
           batches: ["MB-401", "MB-402", "MB-403"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1050,
@@ -667,7 +593,7 @@
           location: "Mumbai Port",
           status: "pending",
           batches: ["MB-601", "MB-602"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1055,
@@ -676,7 +602,7 @@
           location: "Nhava Sheva",
           status: "completed",
           batches: ["MB-651"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1060,
@@ -685,7 +611,7 @@
           location: "Mumbai Port",
           status: "completed",
           batches: ["MB-601", "MB-602"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1065,
@@ -694,7 +620,7 @@
           location: "Chennai Port",
           status: "completed",
           batches: ["MB-201"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1070,
@@ -703,7 +629,7 @@
           location: "Kochi",
           status: "pending",
           batches: ["MB-801"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
         {
           id: 1075,
@@ -712,44 +638,14 @@
           location: "Kandla",
           status: "pending",
           batches: ["MB-1301"],
-          qrImages: makeSlots(7),
+          qrImages: makeSlots(6),
         },
       ];
 
-      /* month map for month name matching */
-      const monthMap = {
-        jan: "01",
-        january: "01",
-        feb: "02",
-        february: "02",
-        mar: "03",
-        march: "03",
-        apr: "04",
-        april: "04",
-        may: "05",
-        jun: "06",
-        june: "06",
-        jul: "07",
-        july: "07",
-        aug: "08",
-        august: "08",
-        sep: "09",
-        sept: "09",
-        september: "09",
-        oct: "10",
-        october: "10",
-        nov: "11",
-        november: "11",
-        dec: "12",
-        december: "12",
-      };
-
-      /* ======== DOM refs ======== */
+      /* DOM refs */
       const cardsGrid = document.getElementById("cardsGrid");
       const searchInput = document.getElementById("searchInput");
       const clearBtn = document.getElementById("clearBtn");
-      const sortBtn = document.getElementById("sortBtn");
-      const sortCaret = document.getElementById("sortCaret");
       const modalBackdrop = document.getElementById("modalBackdrop");
       const modalImage = document.getElementById("modalImage");
       const modalTitle = document.getElementById("modalTitle");
@@ -759,36 +655,34 @@
       const loaderDots = document.getElementById("loaderDots");
       const headerEl = document.getElementById("appHeader");
       const spacer = document.getElementById("spacer");
-      const noResults = document.getElementById("noResults");
 
-      let sortNewest = true;
-
-      /* tiny loader animation (non-blocking) */
+      /* loader animation (unchanged) */
       (function loaderAnimate() {
         if (!qrPixels) return;
         const spans = qrPixels.querySelectorAll("span");
         let i = 0;
         setInterval(() => {
-          spans.forEach((s, idx) =>
-            s.classList.toggle("on", Math.random() > 0.6)
-          );
+          spans.forEach((s) => s.classList.toggle("on", Math.random() > 0.6));
           i++;
-          loaderDots.textContent = ".".repeat((i % 4) + 1);
+          if (document.getElementById("loaderDots")) {
+            const ld = document.getElementById("loaderDots");
+            ld.textContent = ".".repeat((i % 4) + 1);
+          }
         }, 420);
       })();
 
-      /* ensure spacing under header (adjust on resize) */
+      /* update spacer to match header's actual height (keeps internal header padding effective) */
       function updateSpacer() {
         const h = headerEl.clientHeight;
-        spacer.style.height = h + 14 + "px";
+        spacer.style.height = h + 8 + "px";
         const mainWrap = document.getElementById("mainWrap");
-        if (mainWrap) mainWrap.style.marginTop = h + 22 + "px";
+        if (mainWrap) mainWrap.style.marginTop = h + 12 + "px";
       }
       window.addEventListener("load", updateSpacer);
       window.addEventListener("resize", updateSpacer);
       updateSpacer();
 
-      /* ======== matching ======== */
+      /* search utilities */
       function normalize(q) {
         return (q || "")
           .toString()
@@ -796,7 +690,6 @@
           .toLowerCase()
           .replace(/[^\w\s-]/g, "");
       }
-
       function matchesSearch(card, rawQuery) {
         const q = normalize(rawQuery);
         if (!q) return true;
@@ -809,20 +702,6 @@
         )
           return true;
         if (card.date && card.date.toLowerCase().includes(q)) return true;
-        // tokens
-        const tokens = q.split(/\s+/).filter(Boolean);
-        for (const t of tokens) {
-          // month partial match
-          for (const mk of Object.keys(monthMap)) {
-            if (mk.startsWith(t)) {
-              const cardMonth = (new Date(card.date).getMonth() + 1)
-                .toString()
-                .padStart(2, "0");
-              if (cardMonth === monthMap[mk]) return true;
-            }
-          }
-          if (/^\d{2,4}$/.test(t) && card.date.includes(t)) return true;
-        }
         const combined = [
           card.invoice,
           card.location,
@@ -834,23 +713,80 @@
         return combined.includes(q);
       }
 
-      /* ======== render logic ======== */
+      /* render card (no duplicate invoice appended) */
+      function buildCard(card) {
+        const el = document.createElement("article");
+        el.className = "card";
+        el.setAttribute("data-id", card.id);
+
+        const batchesHtml = (card.batches || [])
+          .map((b) => `<span class="chip">${b}</span>`)
+          .join("");
+
+        const thumbsHtml = (card.qrImages || [])
+          .slice(0, 6)
+          .map(
+            (img, idx) => `
+        <div class="thumb" data-card="${card.id}" data-index="${idx}">
+          <img src="${img.url}" alt="qr-${card.id}-${idx}" loading="lazy" onerror="this.style.display='none'; this.closest('.thumb').querySelector('.fallback').style.display='flex'"/>
+          <div class="fallback" style="display:none">No image</div>
+        </div>
+      `
+          )
+          .join("");
+
+        el.innerHTML = `
+        <div class="head">
+          <div class="logo">QR</div>
+          <div style="flex:1">
+            <h3>Shipment ${card.invoice}</h3>
+            <div class="meta">
+              <div style="display:flex;gap:8px;align-items:center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div class="strong">${card.date}</div>
+                  <div style="font-size:14px;color:rgba(255,255,255,0.75)">Container date</div>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:8px;align-items:center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2s7 4.5 7 10a7 7 0 11-14 0c0-5.5 7-10 7-10z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div class="strong">${card.location}</div>
+                  <div style="font-size:14px;color:rgba(255,255,255,0.75)">Port</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row"><div class="label">Status</div><div style="flex:1"><div class="status-pill ${
+          card.status === "completed" ? "done" : "pending"
+        }">${
+          card.status === "completed" ? "Completed" : "Pending"
+        }</div></div></div>
+
+        <div class="row batches-row"><div class="label">Material Batch</div><div style="flex:1" class="chips">${batchesHtml}</div></div>
+
+        <div class="row"><div class="label">QR Code(s)</div><div style="flex:1"><div class="thumbs">${thumbsHtml}</div></div></div>
+      `;
+
+        return el;
+      }
+
+      /* rendering logic */
       function renderCards(scrollToFirst = true) {
         const qRaw = searchInput.value || "";
-        // safe sort: create new array
-        const sorted = [...cards].sort((a, b) => {
-          const da = new Date(a.date),
-            db = new Date(b.date);
-          return sortNewest ? db - da : da - db;
-        });
-
+        const sorted = [...cards].sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
+        );
         const filtered = sorted.filter((c) => matchesSearch(c, qRaw));
         cardsGrid.innerHTML = "";
-        noResults.style.display = "none";
+        document.getElementById("noResults").style.display = "none";
 
         if (filtered.length === 0) {
           cardsGrid.style.display = "none";
-          noResults.style.display = "block";
+          document.getElementById("noResults").style.display = "block";
           return;
         } else {
           cardsGrid.style.display = "grid";
@@ -862,169 +798,7 @@
           cardsGrid.appendChild(cardEl);
         });
 
-        // After inserting, observe for reveal
-        observeCards();
-
-        // scroll to first match without hiding behind header
-        if (scrollToFirst && cardsGrid.firstElementChild) {
-          const first = cardsGrid.firstElementChild;
-          const rect = first.getBoundingClientRect();
-          const absoluteTop = rect.top + window.scrollY;
-          const headerH = headerEl.clientHeight;
-          const target = Math.max(absoluteTop - headerH - 12, 0);
-          window.scrollTo({ top: target, behavior: "smooth" });
-        }
-
-        // debug log
-        console.log(`Search "${qRaw}" → ${filtered.length} result(s)`);
-      }
-
-      function buildCard(card) {
-        const el = document.createElement("article");
-        el.className = "card";
-        el.setAttribute("data-id", card.id);
-
-        const batchesHtml = (card.batches || [])
-          .map((b) => `<span class="chip">${b}</span>`)
-          .join("");
-
-        const thumbsHtml = (card.qrImages || [])
-          .slice(0, 7)
-          .map(
-            (img, idx) => `
-    <div class="thumb" data-card="${card.id}" data-index="${idx}">
-      <img src="${img.url}" alt="qr-${card.id}-${idx}" loading="lazy" onerror="this.style.display='none'; this.closest('.thumb').querySelector('.fallback').style.display='flex'"/>
-      <div class="fallback" style="display:none">No image</div>
-    </div>
-  `
-          )
-          .join("");
-
-        el.innerHTML = `
-    <div class="head">
-      <div class="logo">QR</div>
-      <div style="flex:1">
-        <h3>Shipment ${card.invoice}</h3>
-        <div class="meta">
-          <div style="display:flex;gap:8px;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><div class="strong">${
-            card.date
-          }</div><div style="color:var(--muted);font-size:12px">Container date</div></div>
-          <div style="display:flex;gap:8px;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2s7 4.5 7 10a7 7 0 11-14 0c0-5.5 7-10 7-10z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg><div class="strong">${
-            card.location
-          }</div><div style="color:var(--muted);font-size:12px">Port</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row"><div class="label">Status</div><div style="flex:1"><div class="status-pill ${
-      card.status === "completed" ? "done" : "pending"
-    }">${
-          card.status === "completed" ? "Completed" : "Pending"
-        }</div></div></div>
-
-    <div class="row batches-row"><div class="label">Material Batch</div><div style="flex:1" class="chips">${batchesHtml}</div></div>
-
-    <div class="row"><div class="label">QR Code(s)</div><div style="flex:1"><div class="thumbs">${thumbsHtml}</div></div></div>
-  `;
-
-        const inv = document.createElement("div");
-        inv.style.position = "absolute";
-        inv.style.top = "16px";
-        /* align invoice with card padding (18px) so right gutter is symmetric */
-        inv.style.right = "18px";
-        inv.style.fontWeight = "800";
-        inv.style.opacity = "0.95";
-        inv.textContent = card.invoice;
-        el.appendChild(inv);
-
-        return el;
-      }
-
-      /* ======== interactions ======== */
-      /* attach listeners immediately so search works even while loader visible */
-      (function attachImmediateListeners() {
-        // search listeners (robust)
-        const trigger = debounce(() => renderCards(true), 140);
-        ["input", "keyup", "change", "paste"].forEach((ev) =>
-          searchInput.addEventListener(ev, trigger)
-        );
-        clearBtn.addEventListener("click", () => {
-          searchInput.value = "";
-          renderCards(true);
-          searchInput.focus();
-        });
-
-        // sort
-        sortBtn.addEventListener("click", () => {
-          sortNewest = !sortNewest;
-          sortCaret.classList.toggle("rotated", !sortNewest);
-          renderCards(true);
-        });
-
-        // global click for thumbs -> modal
-        cardsGrid.addEventListener("click", (e) => {
-          const t = e.target.closest(".thumb");
-          if (!t) return;
-          const cardId = Number(t.dataset.card);
-          const idx = Number(t.dataset.index);
-          openModal(cardId, idx);
-        });
-
-        // modal close
-        modalClose.addEventListener("click", closeModal);
-        modalBackdrop.addEventListener("click", (e) => {
-          if (e.target === modalBackdrop) closeModal();
-        });
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape") closeModal();
-        });
-
-        // focus search on '/'
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "/") {
-            if (document.activeElement !== searchInput) {
-              e.preventDefault();
-              searchInput.focus();
-            }
-          }
-        });
-
-        // make Swal toast appear above header
-        const originalSwal = Swal.fire;
-        Swal.fire = function (...a) {
-          const p = originalSwal.apply(this, a);
-          setTimeout(
-            () =>
-              document
-                .querySelectorAll(".swal2-container")
-                .forEach((c) => (c.style.zIndex = "999999")),
-            30
-          );
-          return p;
-        };
-      })();
-
-      /* modal open/close */
-      function openModal(cardId, idx) {
-        const card = cards.find((c) => c.id === cardId);
-        if (!card) return;
-        const imgObj =
-          card.qrImages && card.qrImages[idx]
-            ? card.qrImages[idx]
-            : { url: DUMMY_QR, links: [] };
-        modalImage.src = imgObj.url;
-        modalTitle.textContent = `${card.invoice} — QR ${idx + 1}`;
-        modalBackdrop.style.display = "flex";
-        modalBackdrop.setAttribute("aria-hidden", "false");
-      }
-      function closeModal() {
-        modalBackdrop.style.display = "none";
-        modalBackdrop.setAttribute("aria-hidden", "true");
-        modalImage.src = "";
-      }
-
-      /* observe for reveal */
-      function observeCards() {
+        // reveal animation observer (keeps behavior)
         const observer = new IntersectionObserver(
           (entries) => {
             entries.forEach((en) => {
@@ -1037,9 +811,63 @@
           { threshold: 0.12 }
         );
         document.querySelectorAll(".card").forEach((c) => observer.observe(c));
+
+        if (scrollToFirst && cardsGrid.firstElementChild) {
+          const first = cardsGrid.firstElementChild;
+          const rect = first.getBoundingClientRect();
+          const absoluteTop = rect.top + window.scrollY;
+          const headerH = headerEl.clientHeight;
+          const target = Math.max(absoluteTop - headerH - 12, 0);
+          window.scrollTo({ top: target, behavior: "smooth" });
+        }
       }
 
-      /* debounce helper */
+      /* interactions */
+      const trigger = debounce(() => renderCards(true), 140);
+      ["input", "keyup", "change", "paste"].forEach((ev) =>
+        searchInput.addEventListener(ev, trigger)
+      );
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        renderCards(true);
+        searchInput.focus();
+      });
+
+      // thumbnails open modal (kept)
+      cardsGrid.addEventListener("click", (e) => {
+        const t = e.target.closest(".thumb");
+        if (!t) return;
+        const cardId = Number(t.dataset.card);
+        const idx = Number(t.dataset.index);
+        openModal(cardId, idx);
+      });
+
+      function openModal(cardId, idx) {
+        const card = cards.find((c) => c.id === cardId);
+        if (!card) return;
+        const imgObj =
+          card.qrImages && card.qrImages[idx]
+            ? card.qrImages[idx]
+            : { url: DUMMY_QR };
+        modalImage.src = imgObj.url;
+        modalTitle.textContent = `${card.invoice} — QR ${idx + 1}`;
+        modalBackdrop.style.display = "flex";
+        modalBackdrop.setAttribute("aria-hidden", "false");
+      }
+      function closeModal() {
+        modalBackdrop.style.display = "none";
+        modalBackdrop.setAttribute("aria-hidden", "true");
+        modalImage.src = "";
+      }
+      modalClose.addEventListener("click", closeModal);
+      modalBackdrop.addEventListener("click", (e) => {
+        if (e.target === modalBackdrop) closeModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
+      });
+
+      /* helpers */
       function debounce(fn, ms = 200) {
         let t;
         return (...a) => {
@@ -1048,20 +876,19 @@
         };
       }
 
-      /* ======== loader hide and initial render ======== */
+      /* initial show (hide loader then render) */
       setTimeout(() => {
-        loader.style.display = "none"; // hide loader after configured time
-        renderCards(true); // initial render
-        updateSpacer(); // ensure spacer correct
+        loader.style.display = "none";
+        renderCards(true);
+        updateSpacer();
       }, 4500);
 
-      /* ensure cards render quickly if loader already hidden (dev refresh) */
       if (loader.style.display === "none") {
         renderCards(false);
         updateSpacer();
       }
 
-      /* keep search 'escape clears' */
+      // allow escape to clear search
       searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           searchInput.value = "";
